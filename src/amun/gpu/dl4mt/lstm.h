@@ -1,7 +1,7 @@
 #pragma once
 #include <boost/timer/timer.hpp>
-#include "gpu/mblas/matrix_functions.h"
-#include "gpu/mblas/matrix_wrapper.h"
+#include "gpu/mblas/tensor_functions.h"
+#include "gpu/mblas/tensor_wrapper.h"
 #include "gpu/mblas/handles.h"
 #include "gpu/dl4mt/cell.h"
 #include "cellstate.h"
@@ -17,7 +17,7 @@ class SlowLSTM: public Cell {
 
     virtual void GetNextState(CellState& NextState,
                       const CellState& State,
-                      const mblas::Matrix& Context) const {
+                      const mblas::Tensor& Context) const {
       using namespace mblas;
 
       /* HANDLE_ERROR( cudaStreamSynchronize(mblas::CudaStreamHandler::GetStream())); */
@@ -25,33 +25,31 @@ class SlowLSTM: public Cell {
 
       const unsigned cols = GetStateLength().output;
 
-      // transform context for use with gates
-      Prod(FIO_, Context, *w_.W_);
-      BroadcastVec(_1 + _2, FIO_, *w_.B_); // Broadcasting row-wise
-      // transform context for use with computing the input
-      Prod(H_,  Context, *w_.Wx_);
-      BroadcastVec(_1 + _2, H_, *w_.Bx_); // Broadcasting row-wise
+      // transform context for use with gates and for computing the input (the C part)
+      Prod(FIOC_, Context, *w_.W_);
+      BroadcastVec(_1 + _2, FIOC_, *w_.B_); // Broadcasting row-wise
 
-      // transform previous output for use with gates
+      // transform previous output for use with gates and for computing the input
       Prod(Temp1_, *(State.output), *w_.U_);
-      // transform previous output for use with computing the input
-      Prod(Temp2_, *(State.output), *w_.Ux_);
 
+      Element(_1 + _2, FIOC_, Temp1_);
       // compute the gates
-      Element(Logit(_1 + _2), FIO_, Temp1_);
+      Slice(FIO_, FIOC_, 0, cols * 3);
+      Element(Logit(_1), FIO_);
       Slice(F_, FIO_, 0, cols);
       Slice(I_, FIO_, 1, cols);
       Slice(O_, FIO_, 2, cols);
       // compute the input
-      Element(Tanh(_1 + _2), H_, Temp2_);
+      Slice(C_, FIOC_, 3, cols);
+      Element(Tanh(_1), C_);
 
       // apply the forget gate
       Copy(*NextState.cell, *State.cell);
       Element(_1 * _2, *NextState.cell, F_);
       // apply the input gate
-      Element(_1 * _2, H_, I_);
+      Element(_1 * _2, C_, I_);
       // update the cell state with the input
-      Element(_1 + _2, *NextState.cell, H_);
+      Element(_1 + _2, *NextState.cell, C_);
       // apply the output gate
       Element(_1 * Tanh(_2), O_, *NextState.cell);
       Swap(*(NextState.output), O_);
@@ -66,13 +64,14 @@ class SlowLSTM: public Cell {
     const Weights& w_;
 
     // reused to avoid allocation
-    mutable mblas::Matrix FIO_;
-    mutable mblas::Matrix F_;
-    mutable mblas::Matrix I_;
-    mutable mblas::Matrix O_;
-    mutable mblas::Matrix H_;
-    mutable mblas::Matrix Temp1_;
-    mutable mblas::Matrix Temp2_;
+    mutable mblas::Tensor FIO_;
+    mutable mblas::Tensor FIOC_;
+    mutable mblas::Tensor F_;
+    mutable mblas::Tensor I_;
+    mutable mblas::Tensor O_;
+    mutable mblas::Tensor C_;
+    mutable mblas::Tensor Temp1_;
+    mutable mblas::Tensor Temp2_;
 
     SlowLSTM(const SlowLSTM&) = delete;
 };

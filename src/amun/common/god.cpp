@@ -106,8 +106,10 @@ God& God::Init(int argc, char** argv) {
   }
   //cerr << "useFusedSoftmax_=" << useFusedSoftmax_ << endl;
 
+#ifdef CUDA
   useTensorCores_ = Get<bool>("tensor-cores");
   cerr << "useTensorCores_=" << useTensorCores_ << endl;
+#endif
 
   if (Has("input-file")) {
     LOG(info)->info("Reading from {}", Get<std::string>("input-file"));
@@ -270,7 +272,7 @@ std::vector<ScorerPtr> God::GetScorers(const DeviceInfo &deviceInfo) const {
   return scorers;
 }
 
-BestHypsBasePtr God::GetBestHyps(const DeviceInfo &deviceInfo) const {
+BaseBestHypsPtr God::GetBestHyps(const DeviceInfo &deviceInfo) const {
   if (deviceInfo.deviceType == CPUDevice) {
     return cpuLoaders_.begin()->second->GetBestHyps(*this, deviceInfo);
   }

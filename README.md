@@ -33,19 +33,14 @@
 
 If you use this, please cite:
 
-Marcin Junczys-Dowmunt, Tomasz Dwojak, Hieu Hoang (2016). Is Neural Machine
-Translation Ready for Deployment? A Case Study on 30 Translation Directions
-(https://arxiv.org/abs/1610.01108)
+Marcin Junczys-Dowmunt , Roman Grundkiewicz, Tomasz Dwojak, Hieu Hoang, Kenneth Heafield, Tom Neckermann, Frank Seide, Ulrich Germann, Alham Fikri Aji, Nikolay Bogoychev, André F. T. Martins, Alexandra Birch (2018). Marian: Fast Neural Machine Translation in C++ (https://arxiv.org/abs/1804.00344)
 
-    @InProceedings{junczys2016neural,
-      title     = {Is Neural Machine Translation Ready for Deployment? A Case Study
-                   on 30 Translation Directions},
-      author    = {Junczys-Dowmunt, Marcin and Dwojak, Tomasz and Hoang, Hieu},
-      booktitle = {Proceedings of the 9th International Workshop on Spoken Language
-      Translation (IWSLT)},
-      year      = {2016},
-      address   = {Seattle, WA},
-      url       = {http://workshop2016.iwslt.org/downloads/IWSLT_2016_paper_4.pdf}
+    @article{junczys2018marian,
+      title={Marian: Fast Neural Machine Translation in C++},
+      author={Marcin Junczys-Dowmunt and Roman Grundkiewicz and Tomasz Dwojak and Hieu Hoang and Kenneth Heafield and Tom Neckermann and Frank Seide and Ulrich Germann and Alham Fikri Aji and Nikolay Bogoychev and André F. T. Martins and Alexandra Birch},
+      journal={arXiv preprint arXiv:1804.00344},
+      url={https://arxiv.org/abs/1804.00344}
+      year={2018}
     }
 
 ## Website:
@@ -200,8 +195,11 @@ _Horizon 2020 Research and Innovation Programme_ under grant agreements
 645487 ([Modern MT](http://www.modernmt.eu); 2015-2017),
 644333 ([TraMOOC](http://tramooc.eu/); 2015-2017),
 644402 ([HiML](http://www.himl.eu/); 2015-2017),
-the Amazon Academic Research Awards program, and
-the World Intellectual Property Organization.
+the Amazon Academic Research Awards program,
+the World Intellectual Property Organization,
+and is based upon work supported in part by the Office of the Director of
+National Intelligence (ODNI), Intelligence Advanced Research Projects Activity
+(IARPA), via contract #FA8650-17-C-9117.
 
 This software contains source code provided by NVIDIA Corporation.
 
