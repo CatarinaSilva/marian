@@ -1,7 +1,7 @@
 [submodule "src/marian"]
 	path = src/marian
-	url = https://github.com/CatarinaSilva/marian-dev.git@fix-cmake-python3.5
-	branch = master
+	url = https://github.com/CatarinaSilva/marian-dev.git
+	branch = fix-cmake-python3.5
 [submodule "examples"]
 	path = examples
 	url = https://github.com/marian-nmt/marian-examples
