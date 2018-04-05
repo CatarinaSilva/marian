@@ -1,7 +1,7 @@
 [submodule "src/marian"]
 	path = src/marian
-	url = https://github.com/marian-nmt/marian-dev
-	branch = stable
+	url = https://github.com/CatarinaSilva/marian-dev.git
+	branch = master
 [submodule "examples"]
 	path = examples
 	url = https://github.com/marian-nmt/marian-examples
