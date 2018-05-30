@@ -56,6 +56,28 @@ class GuidedScorer : public Scorer {
       return nullptr;
     }
 
+    virtual void Decode(
+        const State& in,
+        State& out,
+        const std::vector<unsigned>& beamSizes){}
+
+    virtual void BeginSentenceState(State& state, unsigned batchSize){}
+
+    virtual void Encode(const Sentences& sources){}
+
+    virtual void AssembleBeamState(const State& in,
+                                   const Beam& beam,
+                                   State& out){}
+
+    void GetAttention(mblas::Tensor& Attention){}
+    mblas::Tensor& GetAttention(){}
+
+    unsigned GetVocabSize() const{}
+
+    BaseTensor& GetProbs(){}
+
+    void Filter(const std::vector<unsigned>& filterIds){}
+
   protected:
     mblas::Tensor SourceContext_;
 };
