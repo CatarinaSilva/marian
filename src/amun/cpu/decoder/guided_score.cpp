@@ -71,7 +71,7 @@ void GuidedScorerLoader::Load(const God&) {
 ScorerPtr GuidedScorerLoader::NewScorer(const God &god, const DeviceInfo&) const {
   size_t tab = Has("tab") ? Get<size_t>("tab") : 0;
   std::string type = Get<std::string>("type");
-  return ScorerPtr(new GuidedScorer(god, name_, config_, tab));
+  return ScorerPtr(new GuidedScorer(god, name, config, tab));
 }
 
 BaseBestHypsPtr GuidedScorerLoader::GetBestHyps(const God &god, const DeviceInfo &deviceInfo) const {
