@@ -5,6 +5,7 @@
 
 #ifdef HAS_CPU
 #include "cpu/decoder/encoder_decoder_loader.h"
+#include "cpu/decoder/guided_score.h"
 #endif
 
 #ifdef CUDA
@@ -70,7 +71,6 @@ Loader *LoaderFactory::CreateGPU(
   IF_MATCH_RETURN(god, type, "Nematus", GPU::EncoderDecoderLoader);
   IF_MATCH_RETURN(god, type, "nematus", GPU::EncoderDecoderLoader);
   IF_MATCH_RETURN(god, type, "NEMATUS", GPU::EncoderDecoderLoader);
-
   // IF_MATCH_RETURN(type, "Ape", GPU::ApePenaltyLoader);
   // IF_MATCH_RETURN(type, "ape", GPU::ApePenaltyLoader);
   // IF_MATCH_RETURN(type, "APE", GPU::ApePenaltyLoader);
@@ -98,8 +98,8 @@ Loader *LoaderFactory::CreateCPU(
   IF_MATCH_RETURN(god, type, "Nematus", CPU::EncoderDecoderLoader);
   IF_MATCH_RETURN(god, type, "nematus", CPU::EncoderDecoderLoader);
   IF_MATCH_RETURN(god, type, "NEMATUS", CPU::EncoderDecoderLoader);
-
   IF_MATCH_RETURN(god, type, "nematus2", CPU::EncoderDecoderLoader);
+  IF_MATCH_RETURN(god, type, "guided", CPU::GuidedScorerLoader);
   return NULL;
 }
 #endif

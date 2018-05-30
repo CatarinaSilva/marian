@@ -15,6 +15,7 @@ add_library(cpumode OBJECT
   cpu/decoder/encoder_decoder.cpp
   cpu/decoder/encoder_decoder_state.cpp
   cpu/decoder/encoder_decoder_loader.cpp
+  cpu/decoder/guided_score.cpp
   cpu/dl4mt/encoder.cpp
   cpu/dl4mt/gru.cpp
   cpu/dl4mt/model.cpp
