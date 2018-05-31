@@ -51,6 +51,12 @@ State* GuidedScorer::NewState() const {
   return new GSState();
 }
 
+unsigned GuidedScorer::GetVocabSize() const {
+}
+
+BaseTensor& GuidedScorer::GetProbs() {
+  return Probs_;
+}
 
 /////////////////////////////////////////////
 
@@ -62,7 +68,6 @@ GuidedScorerLoader::GuidedScorerLoader(
 
 void GuidedScorerLoader::Load(const God&) {
   std::string type = Get<std::string>("type");
-
   LOG(info)->info("Model type: {}", type);
 }
 
@@ -75,7 +80,6 @@ ScorerPtr GuidedScorerLoader::NewScorer(const God &god, const DeviceInfo&) const
 BaseBestHypsPtr GuidedScorerLoader::GetBestHyps(const God &god, const DeviceInfo &deviceInfo) const {
   return BaseBestHypsPtr(new CPU::BestHyps(god));
 }
-
 
 }
 }

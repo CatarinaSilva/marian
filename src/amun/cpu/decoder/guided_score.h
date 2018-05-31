@@ -3,7 +3,6 @@
 #include <vector>
 #include <string>
 #include <yaml-cpp/yaml.h>
-
 #include "common/scorer.h"
 #include "common/loader.h"
 #include "common/logging.h"
@@ -70,16 +69,18 @@ class GuidedScorer : public Scorer {
                                    State& out){}
 
     void GetAttention(mblas::Tensor& Attention){}
-    mblas::Tensor& GetAttention(){}
+    mblas::Tensor& GetAttention();
 
-    unsigned GetVocabSize() const{}
+    unsigned GetVocabSize() const;
 
-    BaseTensor& GetProbs(){}
+    BaseTensor& GetProbs();
 
     void Filter(const std::vector<unsigned>& filterIds){}
 
   protected:
     mblas::Tensor SourceContext_;
+    mblas::Tensor Probs_;
+
 };
 
 class GuidedScorerLoader : public Loader {
@@ -91,6 +92,7 @@ class GuidedScorerLoader : public Loader {
 
     virtual ScorerPtr NewScorer(const God &god, const DeviceInfo &deviceInfo) const;
     BaseBestHypsPtr GetBestHyps(const God &god, const DeviceInfo &deviceInfo) const;
+
 };
 
 
