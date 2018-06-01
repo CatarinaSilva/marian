@@ -1,4 +1,5 @@
 #include "cpu/decoder/guided_score.h"
+#include "common/file_stream.h"
 #include <vector>
 #include <yaml-cpp/yaml.h>
 #include "common/scorer.h"
@@ -65,10 +66,12 @@ BaseTensor& GuidedScorer::GetProbs() {
 
 
 void GuidedScorer::Decode(const State& in, State& out, const std::vector<unsigned>& beamSizes) {
-  size_t cols = Probs_.size();
+  size_t cols = tpMap_.size();
+  Probs_.Resize(beamSizes[0], cols, 1, 1);
   for(size_t i = 0; i < Probs_.dim(0); ++i) {
     std::copy(tpMap_.begin(), tpMap_.end(), Probs_.begin() + i * cols);
   }
+  std::copy(tpMap_.begin(), tpMap_.end(), Probs_.begin());
 }
 
 //void GuidedScorer::AssembleBeamState(const State& in,
@@ -103,19 +106,27 @@ GuidedScorerLoader::GuidedScorerLoader(
 
 void GuidedScorerLoader::Load(const God& god) {
   string type = Get<string>("type");
-  string path = Get<string>("path");
   LOG(info)->info("Model type: {}", type);
 
   const Vocab& tvcb = god.GetTargetVocab();
-  tpMap_.resize(tvcb.size(), 0.0);
-
+  //tpMap_.resize(tvcb.size(), 0.0);
+  tpMap_.resize(74000, 0.0);
   if(Has("path")) {
-    LOG(info)->info("Loading translation pieces (glossaries) from {}",Get<std::string>("path"));
-    YAML::Node pieces = YAML::Load(InputFileStream(Get<std::string>("path")));
-    for(auto&& word : pieces) {
-      string entry = word.first.as<string>();
+    string path = Get<string>("path");
+    LOG(info)->info("Loading translation pieces (glossaries) from {}", path);
+    //YAML::Node pieces = YAML::Load(InputFileStream(Get<std::string>("path")));
+
+    string entry;
+    ifstream tpfile(path);
+    while (std::getline(tpfile, entry)) {
+    //for(auto&& word : pieces) {
+      //string entry = word.first.as<string>();
       tpMap_[tvcb[entry]] = 1.0;
+      LOG(info)->info("entry: {}", entry);
+      LOG(info)->info("entry id: {}", tvcb[entry]);
+      LOG(info)->info("map prob: {}", tpMap_[tvcb[entry]]);
     }
+    tpfile.close();
   }
 
 }
@@ -131,3 +142,5 @@ BaseBestHypsPtr GuidedScorerLoader::GetBestHyps(const God &god, const DeviceInfo
 
 }
 }
+
+
