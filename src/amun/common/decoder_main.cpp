@@ -34,18 +34,25 @@ int main(int argc, char* argv[])
   LOG(info)->info("Reading input");
 
   SentencesPtr maxiBatch(new Sentences());
+  // TranslationPiecesPtr maxiBatchTranslationPieces(new Sentences());
 
   std::string line;
+  // std::string TpLine;
   unsigned lineNum = 0;
 
   while (std::getline(god.GetInputStream(), line)) {
+    //std::getline(god.GetTranslationPiecesStream(), TpLine)
     maxiBatch->push_back(SentencePtr(new Sentence(god, lineNum++, line)));
+    // maxiBatchTranslationPieces->push_back(SentencePtr(new Sentence(god, lineNum++, line)));
 
     if (maxiBatch->size() >= maxiSize) {
 
       maxiBatch->SortByLength();
       while (maxiBatch->size()) {
         SentencesPtr miniBatch = maxiBatch->NextMiniBatch(miniSize, miniWords);
+        // SentencesPtr miniBatchTranslationPieces = maxiBatchTranslationPieces->NextMiniBatch(miniSize, miniWords);
+        // [&god,miniBatch]{ return TranslationTaskAndOutput(god, miniBatch, miniBatchTranslationPieces); }
+
         //cerr << "miniBatch=" << miniBatch->size() << " maxiBatch=" << maxiBatch->size() << endl;
 
         god.GetThreadPool().enqueue(

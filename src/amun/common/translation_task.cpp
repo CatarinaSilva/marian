@@ -15,9 +15,12 @@ using namespace std;
 
 namespace amunmt {
 
+// void TranslationTaskAndOutput(const God &god, std::shared_ptr<Sentences> sentences, std::shared_ptr<Sentences> translation_pieces) {
+
 void TranslationTaskAndOutput(const God &god, std::shared_ptr<Sentences> sentences) {
   OutputCollector &outputCollector = god.GetOutputCollector();
 
+  // std::shared_ptr<Histories> histories = TranslationTask(god, sentences, translation_pieces);
   std::shared_ptr<Histories> histories = TranslationTask(god, sentences);
 
   for (unsigned i = 0; i < histories->size(); ++i) {
@@ -32,9 +35,11 @@ void TranslationTaskAndOutput(const God &god, std::shared_ptr<Sentences> sentenc
   }
 }
 
+// std::shared_ptr<Histories> TranslationTask(const God &god, std::shared_ptr<Sentences> sentences, std::shared_ptr<Sentences> translation_pieces) {
 std::shared_ptr<Histories> TranslationTask(const God &god, std::shared_ptr<Sentences> sentences) {
   try {
     Search& search = god.GetSearch();
+    // auto histories = search.Translate(*sentences, *translation_pieces);
     auto histories = search.Translate(*sentences);
 
     return histories;

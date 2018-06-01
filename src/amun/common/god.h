@@ -57,6 +57,7 @@ class God {
     Vocab& GetTargetVocab() const;
 
     std::istream& GetInputStream() const;
+    //std::istream& GetTranslationPiecesStream() const;
     OutputCollector& GetOutputCollector() const;
 
     std::shared_ptr<const Filter> GetFilter() const;
@@ -116,6 +117,7 @@ class God {
     std::shared_ptr<spdlog::logger> progress_;
 
     mutable std::unique_ptr<InputFileStream> inputStream_;
+    //mutable std::unique_ptr<InputFileStream> translationPieces_;
     mutable OutputCollector outputCollector_;
 
     mutable unsigned threadIncr_;
