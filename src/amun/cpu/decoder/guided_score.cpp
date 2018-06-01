@@ -64,7 +64,6 @@ BaseTensor& GuidedScorer::GetProbs() {
   return Probs_;
 }
 
-
 void GuidedScorer::Decode(const State& in, State& out, const std::vector<unsigned>& beamSizes) {
   size_t cols = tpMap_.size();
   Probs_.Resize(beamSizes[0], cols, 1, 1);
@@ -74,26 +73,30 @@ void GuidedScorer::Decode(const State& in, State& out, const std::vector<unsigne
   std::copy(tpMap_.begin(), tpMap_.end(), Probs_.begin());
 }
 
-//void GuidedScorer::AssembleBeamState(const State& in,
-//                                     const Beam& beam,
-//                                     State& out) {
-//  std::vector<unsigned> beamWords;
-//  std::vector<unsigned> beamStateIds;
-//  for(auto h : beam) {
-//      beamWords.push_back(h->GetWord());
-//      beamStateIds.push_back(h->GetPrevStateIndex());
-//  }
-//
+void GuidedScorer::AssembleBeamState(const State& in,
+                                     const Beam& beam,
+                                     State& out) {
+  std::vector<unsigned> beamWords;
+  std::vector<unsigned> beamStateIds;
+  for(auto h : beam) {
+      beamWords.push_back(h->GetWord());
+      beamStateIds.push_back(h->GetPrevStateIndex());
+  }
+  string beamWordsLog(beamWords.begin(), beamWords.end());
+  string beamStateIdsLog(beamStateIds.begin(), beamStateIds.end());
+  LOG(info)->info("Beam words: {}", beamWordsLog);
+  LOG(info)->info("Beam words: {}", beamStateIdsLog);
+
 //  const EDState& edIn = in.get<EDState>();
 //  EDState& edOut = out.get<EDState>();
 //
 //  edOut.GetStates() = mblas::Assemble<mblas::byRow, mblas::Tensor>(edIn.GetStates(), beamStateIds);
 //  decoder_->Lookup(edOut.GetEmbeddings(), beamWords);
-//}
+}
 
-//void GuidedScorer::LoadTranslationPieces(const Sentences& translation_pieces) {
-//  translationPieces_ = translation_pieces;
-//}
+void GuidedScorer::LoadTranslationPieces(const Sentences& translation_pieces) {
+  translationPieces_ = translation_pieces;
+}
 
 
 /////////////////////////////////////////////
