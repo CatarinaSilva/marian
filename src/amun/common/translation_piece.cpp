@@ -6,6 +6,7 @@
 #include "god.h"
 #include "utils.h"
 #include "common/vocab.h"
+#include "common/utils.h"
 
 using namespace std;
 using boost::property_tree::ptree;
@@ -21,21 +22,25 @@ TranslationPiece::TranslationPiece(const God &god, unsigned vLineNum, const std:
   : lineNum_(vLineNum)
 {
 
-  std::stringstream ss;
-  ss << line;
-  ptree translation_pieces;
+  std::stringstream ssLine;
+  ssLine << line;
+  ptree root;
 
-  read_json(ss, translation_pieces);
-  ptree &tps = (*translation_pieces.find("translationPieces")).second;
-  BOOST_FOREACH(ptree::value_type &tp, tps)
+  read_json(ssLine, root);
+  ptree &pieces = (*root.find("translationPieces")).second;
+  BOOST_FOREACH(ptree::value_type &pmap, pieces)
   {
-    int score = tp.second.get<int>("score", 0);
-    string tp_type = tp.second.get<string>("type", "");
-    std::vector< std::string> words;
-    BOOST_FOREACH(ptree::value_type &word, tp.second.get_child("words"))
+    float score = pmap.second.get<int>("score", 0.0);
+    std::string ngrams = pmap.second.get<string>("n-grams", "");
+    if(ngrams != "")
     {
-      LOG(info)->info("word: {}", word.second.data());
-      words.push_back(word.second.data());
+      std::vector<std::string> tokens;
+      Split(ngrams, tokens, " ");
+      Du_[god.GetTargetVocab()(tokens)] = score;
+      if(tokens.size() == 1)
+      {
+        Lu_.push_back(god.GetTargetVocab()[ngrams]);
+      }
     }
   }
 
@@ -45,13 +50,17 @@ unsigned TranslationPiece::GetLineNum() const {
   return lineNum_;
 }
 
-const Words& TranslationPiece::GetWords(unsigned index) const {
-  return words_[index];
+float TranslationPiece::GetScore(Words ngrams){
+  if(Du_.count(ngrams) == 1){
+    return Du_[ngrams];
+  } else {
+    return 0.0;
+  }
 }
 
-//const Words& TranslationPiece::GetScore(unsigned index) const {
-//  return score_[index];
-//}
+Words TranslationPiece::GetUnigrams() {
+  return Lu_;
+}
 
 
 }

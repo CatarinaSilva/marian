@@ -1,4 +1,5 @@
 #pragma once
+#include <map>
 #include <memory>
 #include <vector>
 #include <string>
@@ -13,15 +14,14 @@ class TranslationPiece {
 
     TranslationPiece(const God &god, unsigned vLineNum, const std::string& line);
 
-    const Words& GetWords(unsigned index = 0) const;
-
     unsigned GetLineNum() const;
-
-    std::string Debug(unsigned verbosity = 1) const;
+    Words GetUnigrams();
+    float GetScore(Words ngrams);
 
   private:
-    std::vector<Words> words_;
     unsigned lineNum_;
+    std::map<Words, float> Du_;
+    Words Lu_;
 
     TranslationPiece(const TranslationPiece &) = delete;
 };

@@ -6,6 +6,7 @@
 #include "common/scorer.h"
 #include "common/sentence.h"
 #include "common/base_best_hyps.h"
+#include "common/translation_pieces.h"
 
 namespace amunmt {
 
@@ -18,6 +19,7 @@ class Search {
     virtual ~Search();
 
     std::shared_ptr<Histories> Translate(const Sentences& sentences);
+    std::shared_ptr<Histories> Translate(const Sentences& sentences, const TranslationPieces& translation_pieces);
 
   protected:
     States NewStates() const;
