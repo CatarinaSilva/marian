@@ -138,7 +138,6 @@ std::shared_ptr<Histories> Search::Translate(const Sentences& sentences, const T
     //timerStep.start();
 
     for (unsigned i = 0; i < scorers_.size(); i++) {
-      LOG(info)->info("name = {}", scorers_[i]->GetName());
       scorers_[i]->Decode(*states[i], *nextStates[i], beamSizes);
     }
 
@@ -174,7 +173,7 @@ States Search::Encode(const Sentences& sentences, const TranslationPieces& trans
     scorer->Encode(sentences);
     auto state = scorer->NewState();
     scorer->BeginSentenceState(*state, sentences.size());
-    std::string scorer_name = scorer->GetName();
+    std::string scorer_name = scorer->GetType();
     if(scorer_name == "guided"){
       scorer->AddTranslationPieces(*state, sentences.size(), translation_pieces);
     }

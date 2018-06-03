@@ -60,18 +60,17 @@ BaseTensor& GuidedScorer::GetProbs() {
 
 void GuidedScorer::AddTranslationPieces(State& state, unsigned batchSize, const TranslationPieces& translation_pieces) {
     const GSState& gsIn = state.get<GSState>();
-    LOG(info)->info("batch size: {}", batchSize);
-    LOG(info)->info("Tps: {}", translation_pieces.size());
-    LOG(info)->info("States: {}", gsIn.GetStates().size());
 
     TranslationPiecePtr tp = translation_pieces.at(0);
-
+    Words Lu = tp->GetUnigrams();
+    for(size_t i = 0; i < Lu.size(); ++i){
+        tpMap_[i] = 1.0;
+    }
 }
 
 void GuidedScorer::Decode(const State& in, State& out, const std::vector<unsigned>& beamSizes) {
   size_t cols = tpMap_.size();
   Probs_.Resize(beamSizes[0], cols, 1, 1);
-  LOG(info)->info("Probs.size: {}", Probs_.size());
   for(size_t i = 0; i < Probs_.dim(0); ++i) {
     std::copy(tpMap_.begin(), tpMap_.end(), Probs_.begin() + i * cols);
   }
@@ -110,27 +109,7 @@ GuidedScorerLoader::GuidedScorerLoader(
 void GuidedScorerLoader::Load(const God& god) {
   string type = Get<string>("type");
   LOG(info)->info("Model type: {}", type);
-
-  const Vocab& tvcb = god.GetTargetVocab();
-  //tpMap_.resize(tvcb.size(), 0.0);
   tpMap_.resize(74000, 0.0);
-  if(Has("path")) {
-    string path = Get<string>("path");
-    LOG(info)->info("Loading translation pieces (glossaries) from {}", path);
-    //YAML::Node pieces = YAML::Load(InputFileStream(Get<std::string>("path")));
-
-    string entry;
-    ifstream tpfile(path);
-    while (std::getline(tpfile, entry)) {
-    //for(auto&& word : pieces) {
-      //string entry = word.first.as<string>();
-      tpMap_[tvcb[entry]] = 1.0;
-      LOG(info)->info("entry: {}", entry);
-      LOG(info)->info("entry id: {}", tvcb[entry]);
-      LOG(info)->info("map prob: {}", tpMap_[tvcb[entry]]);
-    }
-    tpfile.close();
-  }
 }
 
 ScorerPtr GuidedScorerLoader::NewScorer(const God &god, const DeviceInfo&) const{

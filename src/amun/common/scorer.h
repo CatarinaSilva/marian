@@ -63,12 +63,16 @@ class Scorer {
 
     virtual unsigned GetVocabSize() const = 0;
 
-    virtual void AddTranslationPieces(State& state, unsigned batchSize, const TranslationPieces& translation_pieces);
+    virtual void AddTranslationPieces(State& state, unsigned batchSize, const TranslationPieces& translation_pieces) {}
 
     virtual void CleanAfterTranslation() {}
 
     virtual const std::string& GetName() const {
       return name_;
+    }
+
+    virtual const std::string GetType() const {
+      return config_["type"].as<std::string>();
     }
 
     virtual BaseTensor& GetProbs() = 0;
