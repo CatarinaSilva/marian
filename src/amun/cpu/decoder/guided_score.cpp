@@ -67,6 +67,7 @@ BaseTensor& GuidedScorer::GetProbs() {
 void GuidedScorer::Decode(const State& in, State& out, const std::vector<unsigned>& beamSizes) {
   size_t cols = tpMap_.size();
   Probs_.Resize(beamSizes[0], cols, 1, 1);
+  LOG(info)->info("Probs.size: {}", Probs_.size());
   for(size_t i = 0; i < Probs_.dim(0); ++i) {
     std::copy(tpMap_.begin(), tpMap_.end(), Probs_.begin() + i * cols);
   }
@@ -81,7 +82,6 @@ void GuidedScorer::AssembleBeamState(const State& in,
   for(auto h : beam) {
       beamWords.push_back(h->GetWord());
       beamStateIds.push_back(h->GetPrevStateIndex());
-      LOG(info)->info("Beam state id: {}", h->GetPrevStateIndex());
   }
   string beamWordsLog(beamWords.begin(), beamWords.end());
   string beamStateIdsLog(beamStateIds.begin(), beamStateIds.end());
@@ -108,8 +108,9 @@ void GuidedScorerLoader::Load(const God& god) {
   LOG(info)->info("Model type: {}", type);
 
   const Vocab& tvcb = god.GetTargetVocab();
+  tvcb_ = tvcb
   //tpMap_.resize(tvcb.size(), 0.0);
-  tpMap_.resize(74000, 0.0);
+  tpMap_.resize(tvcb.size(), 0.0);
   if(Has("path")) {
     string path = Get<string>("path");
     LOG(info)->info("Loading translation pieces (glossaries) from {}", path);

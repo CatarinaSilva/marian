@@ -85,6 +85,7 @@ class GuidedScorer : public Scorer {
 
   protected:
     std::vector<float> tpMap_;
+    std::vector<float> tvcb_;
     mblas::ArrayMatrix Probs_;
     std::vector<float> costs_;
 
