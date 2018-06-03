@@ -182,6 +182,8 @@ void Config::AddOptions(unsigned argc, char** argv) {
      "Configuration file")
     ("input-file,i", po::value(&inputPath),
       "Take input from a file instead of stdin")
+    ("translation-pieces", po::value(&tpPath),
+      "Take translation pieces from given file")
     ("model,m", po::value(&modelPaths)->multitoken(),
      "Overwrite scorer section in config file with these models. "
      "Assumes models of type Nematus and assigns model names F0, F1, ...")
@@ -353,6 +355,7 @@ void Config::AddOptions(unsigned argc, char** argv) {
   SET_OPTION_NONDEFAULT("load-weights", std::string);
   SET_OPTION("relative-paths", bool);
   SET_OPTION_NONDEFAULT("input-file", std::string);
+  SET_OPTION_NONDEFAULT("translation-pieces", std::string);
   SET_OPTION("log-progress", std::string);
   SET_OPTION("log-info", std::string);
   // @TODO: Apply complex overwrites
