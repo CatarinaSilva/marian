@@ -110,7 +110,7 @@ void GuidedScorerLoader::Load(const God& god) {
 
   const Vocab& tvcb = god.GetTargetVocab();
   //tpMap_.resize(tvcb.size(), 0.0);
-  tpMap_.resize(tvcb.size(), 0.0);
+  tpMap_.resize(74000, 0.0);
   if(Has("path")) {
     string path = Get<string>("path");
     LOG(info)->info("Loading translation pieces (glossaries) from {}", path);
