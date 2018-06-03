@@ -10,6 +10,7 @@
 #include "common/vocab.h"
 #include "common/base_best_hyps.h"
 #include "cpu/mblas/tensor.h"
+#include "common/translation_pieces.h"
 
 namespace amunmt {
 namespace CPU {
@@ -61,13 +62,14 @@ class GuidedScorer : public Scorer {
         const std::vector<unsigned>& beamSizes);
 
     virtual void BeginSentenceState(State& state, unsigned batchSize){};
-    virtual void BeginSentenceState(State& state, unsigned batchSize, const TranslationPieces& translation_pieces);
 
     virtual void Encode(const Sentences& sources){}
 
     virtual void AssembleBeamState(const State& in,
                                    const Beam& beam,
                                    State& out);
+
+    void AddTranslationPieces(State& state, unsigned batchSize, const TranslationPieces& translation_pieces);
 
     void GetAttention(mblas::Tensor& Attention){}
     mblas::Tensor& GetAttention();
@@ -103,7 +105,6 @@ class GuidedScorerLoader : public Loader {
   protected:
     std::vector<float> tpMap_;
 };
-
 
 }
 }

@@ -6,6 +6,7 @@
 #include "common/histories.h"
 #include "common/filter.h"
 #include "common/base_tensor.h"
+#include "cpu/decoder/guided_score.h"
 
 #ifdef CUDA
 #include <cuda.h>
@@ -137,6 +138,7 @@ std::shared_ptr<Histories> Search::Translate(const Sentences& sentences, const T
     //timerStep.start();
 
     for (unsigned i = 0; i < scorers_.size(); i++) {
+      LOG(info)->info("name = {}", scorers_[i]->GetName());
       scorers_[i]->Decode(*states[i], *nextStates[i], beamSizes);
     }
 
@@ -172,8 +174,9 @@ States Search::Encode(const Sentences& sentences, const TranslationPieces& trans
     scorer->Encode(sentences);
     auto state = scorer->NewState();
     scorer->BeginSentenceState(*state, sentences.size());
-    if(scorer->GetName() == 'guided'){
-      scorer->BeginSentenceState(*state, sentences.size(), translation_pieces);
+    std::string scorer_name = scorer->GetName();
+    if(scorer_name == "guided"){
+      scorer->AddTranslationPieces(*state, sentences.size(), translation_pieces);
     }
     states.emplace_back(state);
   }

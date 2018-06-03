@@ -5,6 +5,7 @@
 
 #include "common/hypothesis.h"
 #include "common/sentence.h"
+#include "common/translation_pieces.h"
 #include "common/base_tensor.h"
 #include "yaml-cpp/node/node.h"
 
@@ -61,6 +62,8 @@ class Scorer {
     virtual State* NewState() const = 0;
 
     virtual unsigned GetVocabSize() const = 0;
+
+    virtual void AddTranslationPieces(State& state, unsigned batchSize, const TranslationPieces& translation_pieces);
 
     virtual void CleanAfterTranslation() {}
 
