@@ -7,6 +7,7 @@
 #include "common/loader.h"
 #include "common/sentences.h"
 #include "common/logging.h"
+#include "common/vocab.h"
 #include "common/base_best_hyps.h"
 #include "cpu/mblas/tensor.h"
 
@@ -41,7 +42,8 @@ class GuidedScorer : public Scorer {
         const std::string& name,
         const YAML::Node& config,
         unsigned tab,
-        const std::vector<float> tpmap);
+        const std::vector<float> tpmap,
+        const Vocab& tvcb);
 
     virtual State* NewState() const;
 
@@ -85,7 +87,7 @@ class GuidedScorer : public Scorer {
 
   protected:
     std::vector<float> tpMap_;
-    std::vector<float> tvcb_;
+    const Vocab& tvcb_;
     mblas::ArrayMatrix Probs_;
     std::vector<float> costs_;
 

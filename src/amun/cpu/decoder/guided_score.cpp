@@ -48,8 +48,9 @@ GuidedScorer::GuidedScorer(
     const std::string& name,
     const YAML::Node& config,
     unsigned tab,
-    std::vector<float> tpmap)
-  : Scorer(god, name, config, tab), tpMap_(tpmap)
+    std::vector<float> tpmap,
+    const Vocab& tvcb)
+  : Scorer(god, name, config, tab), tpMap_(tpmap), tvcb_(tvcb)
 {}
 
 State* GuidedScorer::NewState() const {
@@ -108,7 +109,6 @@ void GuidedScorerLoader::Load(const God& god) {
   LOG(info)->info("Model type: {}", type);
 
   const Vocab& tvcb = god.GetTargetVocab();
-  tvcb_ = tvcb
   //tpMap_.resize(tvcb.size(), 0.0);
   tpMap_.resize(tvcb.size(), 0.0);
   if(Has("path")) {
@@ -128,12 +128,12 @@ void GuidedScorerLoader::Load(const God& god) {
     }
     tpfile.close();
   }
-
 }
 
 ScorerPtr GuidedScorerLoader::NewScorer(const God &god, const DeviceInfo&) const{
   size_t tab = Has("tab") ? Get<size_t>("tab") : 0;
-  return ScorerPtr(new GuidedScorer(god, name_, config_, tab, tpMap_));
+  const Vocab& tvcb = god.GetTargetVocab();
+  return ScorerPtr(new GuidedScorer(god, name_, config_, tab, tpMap_, tvcb));
 }
 
 BaseBestHypsPtr GuidedScorerLoader::GetBestHyps(const God &god, const DeviceInfo &deviceInfo) const {
