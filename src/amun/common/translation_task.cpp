@@ -16,8 +16,7 @@ using namespace std;
 namespace amunmt {
 
 
-void ProduceOutput(const God &god, std::shared_ptr<Sentences> sentences, std::shared_ptr<Histories> histories) {
-  OutputCollector &outputCollector = god.GetOutputCollector();
+void ProduceOutput(OutputCollector &outputCollector, const God &god, std::shared_ptr<Sentences> sentences, std::shared_ptr<Histories> histories) {
 
   for (unsigned i = 0; i < histories->size(); ++i) {
     const History &history = *histories->at(i);
@@ -33,23 +32,20 @@ void ProduceOutput(const God &god, std::shared_ptr<Sentences> sentences, std::sh
 
 
 void TranslationTaskAndOutput(const God &god, std::shared_ptr<Sentences> sentences) {
-
-  // std::shared_ptr<Histories> histories = TranslationTask(god, sentences, translation_pieces);
+  OutputCollector &outputCollector = god.GetOutputCollector();
   std::shared_ptr<Histories> histories = TranslationTask(god, sentences);
-  ProduceOutput(god, sentences, histories);
+  ProduceOutput(outputCollector, god, sentences, histories);
 }
 
 void TranslationTaskAndOutput(const God &god, std::shared_ptr<Sentences> sentences, std::shared_ptr<TranslationPieces> pieces) {
-  // std::shared_ptr<Histories> histories = TranslationTask(god, sentences, translation_pieces);
+  OutputCollector &outputCollector = god.GetOutputCollector();
   std::shared_ptr<Histories> histories = TranslationTask(god, sentences, pieces);
-  ProduceOutput(god, sentences, histories);
+  ProduceOutput(outputCollector, god, sentences, histories);
 }
 
-// std::shared_ptr<Histories> TranslationTask(const God &god, std::shared_ptr<Sentences> sentences, std::shared_ptr<Sentences> translation_pieces) {
 std::shared_ptr<Histories> TranslationTask(const God &god, std::shared_ptr<Sentences> sentences) {
   try {
     Search& search = god.GetSearch();
-    // auto histories = search.Translate(*sentences, *translation_pieces);
     auto histories = search.Translate(*sentences);
 
     return histories;
@@ -82,7 +78,6 @@ std::shared_ptr<Histories> TranslationTask(const God &god, std::shared_ptr<Sente
 std::shared_ptr<Histories> TranslationTask(const God &god, std::shared_ptr<Sentences> sentences, std::shared_ptr<TranslationPieces> pieces) {
   try {
     Search& search = god.GetSearch();
-    // auto histories = search.Translate(*sentences, *translation_pieces);
     auto histories = search.Translate(*sentences, *pieces);
 
     return histories;

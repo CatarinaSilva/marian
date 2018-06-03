@@ -21,13 +21,12 @@ std::string GetSoftAlignmentString(const HypothesisPtr& hypothesis);
 std::string GetNematusAlignmentString(const HypothesisPtr& hypothesis, std::string best, std::string source, unsigned linenum);
 
 template <class OStream>
-void Printer(const God &god, const History& history, OStream& out, const Sentence& sentence) { 
+void Printer(const God &god, const History& history, OStream& out, const Sentence& sentence) {
   auto bestTranslation = history.Top();
   std::vector<std::string> bestSentenceWords = god.Postprocess(god.GetTargetVocab()(bestTranslation.first));
 
   std::string best = Join(bestSentenceWords);
   if (god.Get<bool>("return-nematus-alignment")) {
-	//Get the source sentence for printing Nematus style soft alignments
 	std::string source = Join(god.Postprocess(god.GetSourceVocab()(sentence.GetWords(0))));
     best = GetNematusAlignmentString(bestTranslation.second, best, source, history.GetLineNum());
   }else{

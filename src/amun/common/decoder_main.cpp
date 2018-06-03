@@ -49,7 +49,7 @@ int main(int argc, char* argv[])
 
     if (maxiBatch->size() >= maxiSize) {
 
-      //maxiBatch->SortByLength();
+      maxiBatch->SortByLength();
       while (maxiBatch->size()) {
         SentencesPtr miniBatch = maxiBatch->NextMiniBatch(miniSize, miniWords);
         TranslationPiecesPtr miniBatchTranslationPieces = maxiBatchTranslationPieces->NextMiniBatch(miniSize);
