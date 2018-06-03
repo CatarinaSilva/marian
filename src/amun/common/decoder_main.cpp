@@ -13,6 +13,7 @@
 #include "common/sentences.h"
 #include "common/exception.h"
 #include "common/translation_task.h"
+#include "common/translation_piece.h"
 
 using namespace amunmt;
 using namespace std;
@@ -37,13 +38,14 @@ int main(int argc, char* argv[])
   // TranslationPiecesPtr maxiBatchTranslationPieces(new Sentences());
 
   std::string line;
-  // std::string TpLine;
+  std::string TpLine;
   unsigned lineNum = 0;
 
   while (std::getline(god.GetInputStream(), line)) {
-    //std::getline(god.GetTranslationPiecesStream(), TpLine)
+    std::getline(god.GetTranslationPiecesStream(), TpLine);
     maxiBatch->push_back(SentencePtr(new Sentence(god, lineNum++, line)));
-    // maxiBatchTranslationPieces->push_back(SentencePtr(new Sentence(god, lineNum++, line)));
+    TranslationPiecePtr(new TranslationPiece(god, lineNum++, TpLine));
+    // maxiBatchTranslationPieces->push_back());
 
     if (maxiBatch->size() >= maxiSize) {
 

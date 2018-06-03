@@ -61,6 +61,7 @@ add_library(libcommon OBJECT
   common/search.cpp
   common/sentence.cpp
   common/sentences.cpp
+  common/translation_piece.cpp
   common/types.cpp
   common/utils.cpp
   common/vocab.cpp

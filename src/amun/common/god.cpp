@@ -122,10 +122,10 @@ God& God::Init(int argc, char** argv) {
     inputStream_.reset(new InputFileStream(std::cin));
   }
 
-  //if (Has("translation-pieces")) {
-  //  LOG(info)->info("Reading translation pieces from {}", Get<std::string>("translation-pieces"));
-  //  translationPieces_.reset(new InputFileStream(Get<std::string>("translation-pieces")));
-  //}
+  if (Has("translation-pieces")) {
+    LOG(info)->info("Reading translation pieces from {}", Get<std::string>("translation-pieces"));
+    translationPieces_.reset(new InputFileStream(Get<std::string>("translation-pieces")));
+  }
 
   LoadPrePostProcessing();
 
@@ -253,9 +253,9 @@ std::istream& God::GetInputStream() const {
   return *inputStream_;
 }
 
-//std::istream& God::GetTranslationPiecesStream() const {
-//  return *translationPieces_;
-//}
+std::istream& God::GetTranslationPiecesStream() const {
+  return *translationPieces_;
+}
 
 
 OutputCollector& God::GetOutputCollector() const {
