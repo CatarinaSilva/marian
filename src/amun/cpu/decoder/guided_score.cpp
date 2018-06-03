@@ -81,11 +81,10 @@ void GuidedScorer::AssembleBeamState(const State& in,
   for(auto h : beam) {
       beamWords.push_back(h->GetWord());
       beamStateIds.push_back(h->GetPrevStateIndex());
+      LOG(info)->info("Beam state id: {}", h->GetPrevStateIndex());
   }
   string beamWordsLog(beamWords.begin(), beamWords.end());
   string beamStateIdsLog(beamStateIds.begin(), beamStateIds.end());
-  LOG(info)->info("Beam words: {}", beamWordsLog);
-  LOG(info)->info("Beam words: {}", beamStateIdsLog);
 
 //  const EDState& edIn = in.get<EDState>();
 //  EDState& edOut = out.get<EDState>();
@@ -94,9 +93,6 @@ void GuidedScorer::AssembleBeamState(const State& in,
 //  decoder_->Lookup(edOut.GetEmbeddings(), beamWords);
 }
 
-void GuidedScorer::LoadTranslationPieces(const Sentences& translation_pieces) {
-  translationPieces_ = translation_pieces;
-}
 
 
 /////////////////////////////////////////////

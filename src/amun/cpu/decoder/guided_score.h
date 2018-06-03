@@ -68,7 +68,7 @@ class GuidedScorer : public Scorer {
 
     virtual void AssembleBeamState(const State& in,
                                    const Beam& beam,
-                                   State& out){}
+                                   State& out);
 
     void GetAttention(mblas::Tensor& Attention){}
     mblas::Tensor& GetAttention();
