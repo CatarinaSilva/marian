@@ -16,8 +16,8 @@ using namespace std;
 namespace amunmt {
 
 
-void ProduceOutput(OutputCollector &outputCollector, const God &god, std::shared_ptr<Sentences> sentences, std::shared_ptr<Histories> histories) {
-
+void ProduceOutput(const God &god, std::shared_ptr<Sentences> sentences, std::shared_ptr<Histories> histories) {
+  OutputCollector &outputCollector = god.GetOutputCollector();
   for (unsigned i = 0; i < histories->size(); ++i) {
     const History &history = *histories->at(i);
     unsigned lineNum = history.GetLineNum();
@@ -32,15 +32,13 @@ void ProduceOutput(OutputCollector &outputCollector, const God &god, std::shared
 
 
 void TranslationTaskAndOutput(const God &god, std::shared_ptr<Sentences> sentences) {
-  OutputCollector &outputCollector = god.GetOutputCollector();
   std::shared_ptr<Histories> histories = TranslationTask(god, sentences);
-  ProduceOutput(outputCollector, god, sentences, histories);
+  ProduceOutput(god, sentences, histories);
 }
 
 void TranslationTaskAndOutput(const God &god, std::shared_ptr<Sentences> sentences, std::shared_ptr<TranslationPieces> pieces) {
-  OutputCollector &outputCollector = god.GetOutputCollector();
   std::shared_ptr<Histories> histories = TranslationTask(god, sentences, pieces);
-  ProduceOutput(outputCollector, god, sentences, histories);
+  ProduceOutput(god, sentences, histories);
 }
 
 std::shared_ptr<Histories> TranslationTask(const God &god, std::shared_ptr<Sentences> sentences) {

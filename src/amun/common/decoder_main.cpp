@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
 
   while (std::getline(god.GetInputStream(), line)) {
     std::getline(god.GetTranslationPiecesStream(), TpLine);
-    maxiBatch->push_back(SentencePtr(new Sentence(god, lineNum++, line)));
+    maxiBatch->push_back(SentencePtr(new Sentence(god, lineNum, line)));
     maxiBatchTranslationPieces->push_back(TranslationPiecePtr(new TranslationPiece(god, lineNum++, TpLine)));
 
     if (maxiBatch->size() >= maxiSize) {
