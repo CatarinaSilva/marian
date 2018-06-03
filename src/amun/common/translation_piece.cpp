@@ -1,6 +1,7 @@
 #include <sstream>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include <boost/foreach.hpp>
 #include "translation_piece.h"
 #include "god.h"
 #include "utils.h"
@@ -25,14 +26,17 @@ TranslationPiece::TranslationPiece(const God &god, unsigned vLineNum, const std:
   ptree translation_pieces;
 
   read_json(ss, translation_pieces);
-
-  for (ptree::value_type &tpiece : translation_pieces.get_child("translationPieces"))
+  ptree &tps = (*translation_pieces.find("translationPieces")).second;
+  BOOST_FOREACH(ptree::value_type &tp, tps)
   {
-    // Get the label of the node
-    std::string tp = tpiece.first;
-    // Get the content of the node
-    std::string tpdata = tpiece.second.data();
-    LOG(info)->info("{}: {}", tp, tpdata);
+    int score = tp.second.get<int>("score", 0);
+    string tp_type = tp.second.get<string>("type", "");
+    std::vector< std::string> words;
+    BOOST_FOREACH(ptree::value_type &word, tp.second.get_child("words"))
+    {
+      LOG(info)->info("word: {}", word.second.data());
+      words.push_back(word.second.data());
+    }
   }
 
 }
