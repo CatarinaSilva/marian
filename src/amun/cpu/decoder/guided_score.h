@@ -24,12 +24,8 @@ class GuidedScorerState : public State {
     CPU::mblas::Tensor& GetStates();
     const CPU::mblas::Tensor& GetStates() const;
 
-  	CPU::mblas::Tensor& GetEmbeddings();
-    const CPU::mblas::Tensor& GetEmbeddings() const;
-
   private:
     CPU::mblas::Tensor states_;
-    CPU::mblas::Tensor embeddings_;
 };
 
 class GuidedScorer : public Scorer {
@@ -64,7 +60,8 @@ class GuidedScorer : public Scorer {
         State& out,
         const std::vector<unsigned>& beamSizes);
 
-    virtual void BeginSentenceState(State& state, unsigned batchSize){}
+    virtual void BeginSentenceState(State& state, unsigned batchSize){};
+    virtual void BeginSentenceState(State& state, unsigned batchSize, const TranslationPieces& translation_pieces);
 
     virtual void Encode(const Sentences& sources){}
 

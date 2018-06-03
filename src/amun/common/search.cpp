@@ -125,7 +125,7 @@ std::shared_ptr<Histories> Search::Translate(const Sentences& sentences, const T
     FilterTargetVocab(sentences);
   }
 
-  States states = Encode(sentences);
+  States states = Encode(sentences, translation_pieces);
   States nextStates = NewStates();
   std::vector<unsigned> beamSizes(sentences.size(), 1);
 
@@ -166,6 +166,20 @@ std::shared_ptr<Histories> Search::Translate(const Sentences& sentences, const T
 }
 
 
+States Search::Encode(const Sentences& sentences, const TranslationPieces& translation_pieces) {
+  States states;
+  for (auto& scorer : scorers_) {
+    scorer->Encode(sentences);
+    auto state = scorer->NewState();
+    scorer->BeginSentenceState(*state, sentences.size());
+    if(scorer->GetName() == 'guided'){
+      scorer->BeginSentenceState(*state, sentences.size(), translation_pieces);
+    }
+    states.emplace_back(state);
+  }
+  return states;
+}
+
 States Search::Encode(const Sentences& sentences) {
   States states;
   for (auto& scorer : scorers_) {
@@ -176,6 +190,7 @@ States Search::Encode(const Sentences& sentences) {
   }
   return states;
 }
+
 
 bool Search::CalcBeam(
     std::shared_ptr<Histories>& histories,

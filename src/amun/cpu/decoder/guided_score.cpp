@@ -29,17 +29,10 @@ CPU::mblas::Tensor& GuidedScorerState::GetStates() {
   return states_;
 }
 
-CPU::mblas::Tensor& GuidedScorerState::GetEmbeddings() {
-  return embeddings_;
-}
-
 const CPU::mblas::Tensor& GuidedScorerState::GetStates() const {
   return states_;
 }
 
-const CPU::mblas::Tensor& GuidedScorerState::GetEmbeddings() const {
-  return embeddings_;
-}
 
 ////////////////////////////////////////////////
 
@@ -64,6 +57,17 @@ unsigned GuidedScorer::GetVocabSize() const {
 BaseTensor& GuidedScorer::GetProbs() {
   return Probs_;
 }
+
+void GuidedScorer::BeginSentenceState(State& state, unsigned batchSize, const TranslationPieces& translation_pieces) {
+    const GSState& gsIn = state.get<GSState>();
+    LOG(info)->info("batch size: {}", batchSize)
+    LOG(info)->info("Tps: {}", translation_pieces.size())
+    LOG(info)->info("States: {}", gsIn.size())
+
+    tp = translation_pieces->Get(0)
+
+}
+
 
 void GuidedScorer::Decode(const State& in, State& out, const std::vector<unsigned>& beamSizes) {
   size_t cols = tpMap_.size();
