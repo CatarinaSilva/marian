@@ -125,7 +125,6 @@ std::shared_ptr<Histories> Search::Translate(const Sentences& sentences, const T
     FilterTargetVocab(sentences);
   }
 
-
   States states = Encode(sentences);
   States nextStates = NewStates();
   std::vector<unsigned> beamSizes(sentences.size(), 1);
