@@ -64,7 +64,7 @@ void GuidedScorer::AddTranslationPieces(State& state, unsigned batchSize, const 
     TranslationPiecePtr tp = translation_pieces.at(0);
     Words Lu = tp->GetUnigrams();
     for(size_t i = 0; i < Lu.size(); ++i){
-        tpMap_[i] = 1.0;
+        tpMap_[Lu[i]] = 1.0;
     }
 }
 
