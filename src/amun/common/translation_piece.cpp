@@ -30,7 +30,7 @@ TranslationPiece::TranslationPiece(const God &god, unsigned vLineNum, const std:
   ptree &pieces = (*root.find("translationPieces")).second;
   BOOST_FOREACH(ptree::value_type &pmap, pieces)
   {
-    float score = pmap.second.get<int>("score", 0.0);
+    float score = pmap.second.get<float>("score", 0.0);
     std::string ngrams = pmap.second.get<string>("n-grams", "");
     if(ngrams != "")
     {
