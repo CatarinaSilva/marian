@@ -89,7 +89,8 @@ class GuidedScorer : public Scorer {
     const Vocab& tvcb_;
     mblas::ArrayMatrix Probs_;
     std::vector<float> costs_;
-
+    std::vector<Words> last_ngrams_;
+    TranslationPiecePtr translation_pieces_;
 };
 
 class GuidedScorerLoader : public Loader {

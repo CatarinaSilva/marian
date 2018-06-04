@@ -60,49 +60,61 @@ BaseTensor& GuidedScorer::GetProbs() {
 
 void GuidedScorer::AddTranslationPieces(State& state, unsigned batchSize, const TranslationPieces& translation_pieces) {
     const GSState& gsIn = state.get<GSState>();
-
     TranslationPiecePtr tp = translation_pieces.at(0);
+    //translation_pieces_ = tp;
     Words Lu = tp->GetUnigrams();
     for(size_t i = 0; i < Lu.size(); ++i){
         Word unigram = Lu[i];
         vector<Word> unigrams;
         unigrams.push_back(unigram);
         tpMap_[unigram] = tp->GetScore(unigrams);
+        LOG(info)->info(tpMap_[unigram]);
     }
 }
 
 void GuidedScorer::Decode(const State& in, State& out, const std::vector<unsigned>& beamSizes) {
   size_t cols = tpMap_.size();
+  //Words Lu = translation_pieces_->GetUnigrams();
   Probs_.Resize(beamSizes[0], cols, 1, 1);
   for(size_t i = 0; i < Probs_.dim(0); ++i) {
     std::copy(tpMap_.begin(), tpMap_.end(), Probs_.begin() + i * cols);
+    //std::vector<float> tp_map_temp(tpMap_);
+    //for(size_t j = 0; j < Lu.size(); ++j){
+      //Word unigram = Lu[j];
+      //LOG(info)->info("Word {}", std::to_string(unigram));
+      //vector<Word> unigrams_b;
+      //unigrams_b.push_back(unigram);
+      //tp_map_temp[unigram] = translation_pieces_->GetScore(unigrams_b);
+      //LOG(info)->info("Added {}", std::to_string(translation_pieces_->GetScore(unigrams_b)));
+      //if(i<last_ngrams_.size())
+      //{
+      //  Words b = last_ngrams_[i];
+      //  for(size_t k=0; k<b.size(); ++k){
+      //    unigrams_b.insert(unigrams_b.begin(), b[k]);
+      //    tp_map_temp[unigram] += translation_pieces_->GetScore(unigrams_b);
+      //  }
+      //}
+    //}
+    //std::copy(tp_map_temp.begin(), tp_map_temp.end(), Probs_.begin() + i * cols);
   }
-  std::copy(tpMap_.begin(), tpMap_.end(), Probs_.begin());
 }
 
 void GuidedScorer::AssembleBeamState(const State& in,
                                      const Beam& beam,
                                      State& out) {
-
-  vector<vector<unsigned>> beam_ngrams;
+  last_ngrams_.clear();
   for(auto h : beam) {
-      while(h->GetPrevStateIndex() > 0){
-          vector<unsigned> last_ngrams;
-          last_ngrams.push_back(h->GetWord());
-          LOG(info)->info("word: {}", h->GetWord());
-          LOG(info)->info("prev state: {}", h->GetPrevStateIndex());
-          HypothesisPtr previous =  h->GetPrevHyp();
+      int prevWordCount = 0;
+      Words local_ngrams;
+      HypothesisPtr hyp = h;
+      while(hyp->GetPrevStateIndex() > 0 && prevWordCount < 2 ){
+          local_ngrams.push_back(hyp->GetWord());
+          hyp = hyp->GetPrevHyp();
+          prevWordCount++;
       }
-      std:vector<unsigned> last_ngrams;
-      last_ngrams.push_back(h->GetWord());
-      beam_ngrams.push_back(last_ngrams);
+      local_ngrams.push_back(hyp->GetWord());
+      last_ngrams_.push_back(local_ngrams);
   }
-
-//  const EDState& edIn = in.get<EDState>();
-//  EDState& edOut = out.get<EDState>();
-//
-//  edOut.GetStates() = mblas::Assemble<mblas::byRow, mblas::Tensor>(edIn.GetStates(), beamStateIds);
-//  decoder_->Lookup(edOut.GetEmbeddings(), beamWords);
 }
 
 
