@@ -64,7 +64,10 @@ void GuidedScorer::AddTranslationPieces(State& state, unsigned batchSize, const 
     TranslationPiecePtr tp = translation_pieces.at(0);
     Words Lu = tp->GetUnigrams();
     for(size_t i = 0; i < Lu.size(); ++i){
-        tpMap_[Lu[i]] = 1.0;
+        Word unigram = Lu[i];
+        vector<Word> unigrams;
+        unigrams.push_back(unigram);
+        tpMap_[unigram] = tp->GetScore(unigrams);
     }
 }
 
@@ -80,14 +83,20 @@ void GuidedScorer::Decode(const State& in, State& out, const std::vector<unsigne
 void GuidedScorer::AssembleBeamState(const State& in,
                                      const Beam& beam,
                                      State& out) {
-  std::vector<unsigned> beamWords;
-  std::vector<unsigned> beamStateIds;
+
+  vector<vector<unsigned>> beam_ngrams;
   for(auto h : beam) {
-      beamWords.push_back(h->GetWord());
-      beamStateIds.push_back(h->GetPrevStateIndex());
+      while(h->GetPrevStateIndex() > 0){
+          vector<unsigned> last_ngrams;
+          last_ngrams.push_back(h->GetWord());
+          LOG(info)->info("word: {}", h->GetWord());
+          LOG(info)->info("prev state: {}", h->GetPrevStateIndex());
+          HypothesisPtr previous =  h->GetPrevHyp();
+      }
+      std:vector<unsigned> last_ngrams;
+      last_ngrams.push_back(h->GetWord());
+      beam_ngrams.push_back(last_ngrams);
   }
-  string beamWordsLog(beamWords.begin(), beamWords.end());
-  string beamStateIdsLog(beamStateIds.begin(), beamStateIds.end());
 
 //  const EDState& edIn = in.get<EDState>();
 //  EDState& edOut = out.get<EDState>();
