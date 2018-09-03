@@ -33,7 +33,8 @@ class Search {
     		std::vector<unsigned>& beamSizes,
         Beam& prevHyps,
     		States& states,
-    		States& nextStates);
+    		States& nextStates,
+    		unsigned decoderStep);
 
     Search(const Search&) = delete;
 
