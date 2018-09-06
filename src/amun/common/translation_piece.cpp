@@ -36,23 +36,30 @@ TranslationPiece::TranslationPiece(const God &god, unsigned vLineNum, const std:
     {
       std::vector<std::string> tokens;
       Split(ngrams, tokens, " ");
-      Du_[god.GetTargetVocab()(tokens)] = score;
+      Words ngram = god.GetTargetVocab()(tokens, 0);
+      Du_.insert(std::pair<std::string,float>(WordsToKey(ngram), score));
       if(tokens.size() == 1)
       {
         Lu_.push_back(god.GetTargetVocab()[ngrams]);
       }
     }
   }
-
 }
 
 unsigned TranslationPiece::GetLineNum() const {
   return lineNum_;
 }
 
+std::string TranslationPiece::WordsToKey(Words ngrams) const {
+  std::stringstream keystring;
+  std::copy(ngrams.begin(), ngrams.end(), std::ostream_iterator<unsigned>(keystring, " "));
+  return keystring.str();
+}
+
 float TranslationPiece::GetScore(Words ngrams){
-  if(Du_.count(ngrams) == 1){
-    return Du_[ngrams];
+  std::string ngrams_str = WordsToKey(ngrams);
+  if(Du_.count(ngrams_str) == 1){
+    return Du_[ngrams_str];
   } else {
     return 0.0;
   }
