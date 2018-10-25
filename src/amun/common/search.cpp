@@ -148,7 +148,7 @@ std::shared_ptr<Histories> Search::Translate(const Sentences& sentences, const T
     }
     //cerr << "beamSizes=" << Debug(beamSizes, 1) << endl;
 
-    bool hasSurvivors = CalcBeam(histories, beamSizes, prevHyps, states, nextStates);
+    bool hasSurvivors = CalcBeam(histories, beamSizes, prevHyps, states, nextStates, decoderStep);
     if (!hasSurvivors) {
       break;
     }
