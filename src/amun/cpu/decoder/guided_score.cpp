@@ -37,13 +37,15 @@ const CPU::mblas::Tensor& GuidedScorerState::GetStates() const {
 ////////////////////////////////////////////////
 
 GuidedScorer::GuidedScorer(
-	const God &god,
+    const God &god,
     const std::string& name,
     const YAML::Node& config,
     unsigned tab,
     std::vector<float> tpmap,
-    const Vocab& tvcb)
-  : Scorer(god, name, config, tab), tpMap_(tpmap), tvcb_(tvcb)
+    const Vocab& tvcb,
+    float sim_tresh,
+    unsigned max_n_grams)
+  : Scorer(god, name, config, tab), tpMap_(tpmap), tvcb_(tvcb), simThresh_(sim_tresh), maxNgrams_(max_n_grams)
 {}
 
 State* GuidedScorer::NewState() const {
@@ -60,49 +62,55 @@ BaseTensor& GuidedScorer::GetProbs() {
 
 void GuidedScorer::AddTranslationPieces(State& state, unsigned batchSize, const TranslationPieces& translation_pieces) {
     const GSState& gsIn = state.get<GSState>();
-
-    TranslationPiecePtr tp = translation_pieces.at(0);
-    Words Lu = tp->GetUnigrams();
-    for(size_t i = 0; i < Lu.size(); ++i){
-        Word unigram = Lu[i];
-        vector<Word> unigrams;
-        unigrams.push_back(unigram);
-        tpMap_[unigram] = tp->GetScore(unigrams);
-    }
+    translation_pieces_ = translation_pieces.at(0);
 }
 
 void GuidedScorer::Decode(const State& in, State& out, const std::vector<unsigned>& beamSizes) {
   size_t cols = tpMap_.size();
+  Words Lu = translation_pieces_->GetUnigrams();
   Probs_.Resize(beamSizes[0], cols, 1, 1);
   for(size_t i = 0; i < Probs_.dim(0); ++i) {
-    std::copy(tpMap_.begin(), tpMap_.end(), Probs_.begin() + i * cols);
+    std::vector<float> tp_map_temp(tpMap_);
+    for(size_t j = 0; j < Lu.size(); ++j){
+      Word unigram = Lu[j];
+      vector<Word> unigrams_b;
+      unigrams_b.push_back(unigram);
+      float unigram_score = translation_pieces_->GetScore(unigrams_b);
+      if(unigram_score >= simThresh_){
+        tp_map_temp[unigram] = translation_pieces_->GetScore(unigrams_b);
+      }
+      if(i<last_ngrams_.size())
+      {
+        Words b = last_ngrams_[i];
+        for(size_t k=0; k<b.size(); ++k){
+          unigrams_b.insert(unigrams_b.begin(), b[k]);
+          float ngram_score = translation_pieces_->GetScore(unigrams_b);
+          if(ngram_score >= simThresh_){
+            tp_map_temp[unigram] += translation_pieces_->GetScore(unigrams_b);
+          }
+        }
+      }
+    }
+    std::copy(tp_map_temp.begin(), tp_map_temp.end(), Probs_.begin() + i * cols);
   }
-  std::copy(tpMap_.begin(), tpMap_.end(), Probs_.begin());
 }
 
 void GuidedScorer::AssembleBeamState(const State& in,
                                      const Beam& beam,
                                      State& out) {
-
-  vector<vector<unsigned>> beam_ngrams;
+  last_ngrams_.clear();
   for(auto h : beam) {
-      while(h->GetPrevStateIndex() > 0){
-          vector<unsigned> last_ngrams;
-          last_ngrams.push_back(h->GetWord());
-          LOG(info)->info("word: {}", h->GetWord());
-          LOG(info)->info("prev state: {}", h->GetPrevStateIndex());
-          HypothesisPtr previous =  h->GetPrevHyp();
+      int prevWordCount = 0;
+      Words local_ngrams;
+      HypothesisPtr hyp = h;
+      while(hyp->GetPrevStateIndex() > 0 && prevWordCount < (maxNgrams_ - 1) ){
+          local_ngrams.push_back(hyp->GetWord());
+          hyp = hyp->GetPrevHyp();
+          prevWordCount++;
       }
-      std:vector<unsigned> last_ngrams;
-      last_ngrams.push_back(h->GetWord());
-      beam_ngrams.push_back(last_ngrams);
+      local_ngrams.push_back(hyp->GetWord());
+      last_ngrams_.push_back(local_ngrams);
   }
-
-//  const EDState& edIn = in.get<EDState>();
-//  EDState& edOut = out.get<EDState>();
-//
-//  edOut.GetStates() = mblas::Assemble<mblas::byRow, mblas::Tensor>(edIn.GetStates(), beamStateIds);
-//  decoder_->Lookup(edOut.GetEmbeddings(), beamWords);
 }
 
 
@@ -118,13 +126,22 @@ GuidedScorerLoader::GuidedScorerLoader(
 void GuidedScorerLoader::Load(const God& god) {
   string type = Get<string>("type");
   LOG(info)->info("Model type: {}", type);
-  tpMap_.resize(74000, 0.0);
+
+  vocab_size_ = Has("out_emb_size") ? Get<int>("out_emb_size") : 0;
+  similarityThreshold_ = Has("similarity_threshold") ? Get<float>("similarity_threshold") : 0.0;
+  maxNgrams_ = Has("max_n_grams") ? Get<int>("max_n_grams") : 4;
+
+  if(vocab_size_ > 0){
+    tpMap_.resize(vocab_size_, 0.0);
+  } else {
+    tpMap_.resize(god.GetTargetVocab().size(), 0.0);
+  }
 }
 
 ScorerPtr GuidedScorerLoader::NewScorer(const God &god, const DeviceInfo&) const{
   size_t tab = Has("tab") ? Get<size_t>("tab") : 0;
   const Vocab& tvcb = god.GetTargetVocab();
-  return ScorerPtr(new GuidedScorer(god, name_, config_, tab, tpMap_, tvcb));
+  return ScorerPtr(new GuidedScorer(god, name_, config_, tab, tpMap_, tvcb, similarityThreshold_, maxNgrams_));
 }
 
 BaseBestHypsPtr GuidedScorerLoader::GetBestHyps(const God &god, const DeviceInfo &deviceInfo) const {

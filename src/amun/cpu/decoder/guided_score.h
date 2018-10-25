@@ -40,7 +40,9 @@ class GuidedScorer : public Scorer {
         const YAML::Node& config,
         unsigned tab,
         const std::vector<float> tpmap,
-        const Vocab& tvcb);
+        const Vocab& tvcb,
+        float sim_tresh,
+        unsigned max_n_grams);
 
     virtual State* NewState() const;
 
@@ -82,14 +84,15 @@ class GuidedScorer : public Scorer {
 
     void Filter(const std::vector<unsigned>& filterIds){}
 
-    //void LoadTranslationPieces(const Sentences& translation_pieces);
-
   protected:
     std::vector<float> tpMap_;
     const Vocab& tvcb_;
     mblas::ArrayMatrix Probs_;
     std::vector<float> costs_;
-
+    std::vector<Words> last_ngrams_;
+    TranslationPiecePtr translation_pieces_;
+    float simThresh_;
+    unsigned maxNgrams_;
 };
 
 class GuidedScorerLoader : public Loader {
@@ -104,6 +107,9 @@ class GuidedScorerLoader : public Loader {
 
   protected:
     std::vector<float> tpMap_;
+    int vocab_size_;
+    float similarityThreshold_;
+    unsigned maxNgrams_;
 };
 
 }

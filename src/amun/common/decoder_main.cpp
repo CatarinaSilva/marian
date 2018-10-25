@@ -48,7 +48,6 @@ int main(int argc, char* argv[])
     std::getline(god.GetTranslationPiecesStream(), TpLine);
     maxiBatch->push_back(SentencePtr(new Sentence(god, lineNum, line)));
     maxiBatchTranslationPieces->push_back(TranslationPiecePtr(new TranslationPiece(god, lineNum++, TpLine)));
-
     if (maxiBatch->size() >= maxiSize) {
 
       maxiBatch->SortByLength();

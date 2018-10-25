@@ -20,8 +20,10 @@ class TranslationPiece {
 
   private:
     unsigned lineNum_;
-    std::map<Words, float> Du_;
+    std::map<std::string,float> Du_;
     Words Lu_;
+
+    std::string WordsToKey(Words ngrams) const;
 
     TranslationPiece(const TranslationPiece &) = delete;
 };
