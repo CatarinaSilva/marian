@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
       }
 
       maxiBatch.reset(new Sentences());
-      maxiBatchTranslationPieces.reset(new Sentences());
+      maxiBatchTranslationPieces.reset(new TranslationPieces());
     }
 
   }

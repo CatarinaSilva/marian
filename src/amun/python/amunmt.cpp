@@ -64,7 +64,7 @@ boost::python::list translate(boost::python::list& in, boost::python::list& tps)
       }
 
       maxiBatch.reset(new Sentences());
-      maxiBatchTranslationPieces.reset(new Sentences());
+      maxiBatchTranslationPieces.reset(new TranslationPieces());
     }
   }
 
