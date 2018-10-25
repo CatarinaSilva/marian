@@ -64,6 +64,7 @@ int main(int argc, char* argv[])
       }
 
       maxiBatch.reset(new Sentences());
+      maxiBatchTranslationPieces.reset(new Sentences());
     }
 
   }
@@ -73,8 +74,12 @@ int main(int argc, char* argv[])
     maxiBatch->SortByLength();
     while (maxiBatch->size()) {
       SentencesPtr miniBatch = maxiBatch->NextMiniBatch(miniSize, miniWords);
+      TranslationPiecesPtr miniBatchTranslationPieces = maxiBatchTranslationPieces->NextMiniBatch(miniSize);
+
       god.GetThreadPool().enqueue(
-          [&god,miniBatch]{ return TranslationTaskAndOutput(god, miniBatch); }
+          [&god,miniBatch,miniBatchTranslationPieces]{
+          return TranslationTaskAndOutput(god, miniBatch, miniBatchTranslationPieces);
+          }
           );
     }
   }
