@@ -97,10 +97,12 @@ void BestHyps::CalcBeam(
     if (returnAttentionWeights_) {
       std::vector<SoftAlignmentPtr> alignments;
       for (auto& scorer : scorers) {
-        if (CPU::CPUEncoderDecoderBase* encdec = dynamic_cast<CPU::CPUEncoderDecoderBase*>(scorer.get())) {
-          auto& attention = encdec->GetAttention();
-          alignments.emplace_back(new SoftAlignment(attention.begin(hypIndex),
-                                                    attention.end(hypIndex)));
+        if (scorer->GetName() != "guided"){
+          if (CPU::CPUEncoderDecoderBase* encdec = dynamic_cast<CPU::CPUEncoderDecoderBase*>(scorer.get())) {
+            auto& attention = encdec->GetAttention();
+            alignments.emplace_back(new SoftAlignment(attention.begin(hypIndex),
+                                                      attention.end(hypIndex)));
+          }
         } else {
           amunmt_UTIL_THROW2("Return Alignment is allowed only with Nematus scorer.");
         }
