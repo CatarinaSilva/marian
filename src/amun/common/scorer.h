@@ -5,6 +5,7 @@
 
 #include "common/hypothesis.h"
 #include "common/sentence.h"
+#include "common/translation_pieces.h"
 #include "common/base_tensor.h"
 #include "yaml-cpp/node/node.h"
 
@@ -62,10 +63,16 @@ class Scorer {
 
     virtual unsigned GetVocabSize() const = 0;
 
+    virtual void AddTranslationPieces(State& state, unsigned batchSize, const TranslationPieces& translation_pieces) {}
+
     virtual void CleanAfterTranslation() {}
 
     virtual const std::string& GetName() const {
       return name_;
+    }
+
+    virtual const std::string GetType() const {
+      return config_["type"].as<std::string>();
     }
 
     virtual BaseTensor& GetProbs() = 0;

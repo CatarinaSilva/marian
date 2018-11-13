@@ -5,6 +5,7 @@
 #include "gru.h"
 #include "common/god.h"
 
+
 namespace amunmt {
 namespace CPU {
 namespace dl4mt {

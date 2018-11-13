@@ -25,7 +25,7 @@ void init(const std::string& options) {
 }
 
 
-boost::python::list translate(boost::python::list& in)
+boost::python::list translate(boost::python::list& in, boost::python::list& tps)
 {
   size_t miniSize = god_.Get<size_t>("mini-batch");
   size_t maxiSize = god_.Get<size_t>("maxi-batch");
@@ -35,27 +35,36 @@ boost::python::list translate(boost::python::list& in)
   SentencesPtr maxiBatch(new Sentences());
   SentencesPtr maxiBatchCopy(new Sentences());
 
+  TranslationPiecesPtr maxiBatchTranslationPieces(new TranslationPieces());
+  TranslationPiecesPtr maxiBatchTranslationPiecesCopy(new TranslationPieces());
+
   for(int lineNum = 0; lineNum < boost::python::len(in); ++lineNum) {
     std::string line = boost::python::extract<std::string>(boost::python::object(in[lineNum]));
+    std::string TpLine = boost::python::extract<std::string>(boost::python::object(tps[lineNum]));
     //cerr << "line=" << line << endl;
 
     maxiBatch->push_back(SentencePtr(new Sentence(god_, lineNum, line)));
+    maxiBatchTranslationPieces->push_back(TranslationPiecePtr(new TranslationPiece(god_, lineNum, TpLine)));
 
     if (maxiBatch->size() >= maxiSize) {
 
       maxiBatch->SortByLength();
       while (maxiBatch->size()) {
         SentencesPtr miniBatch = maxiBatch->NextMiniBatch(miniSize, miniWords);
+        TranslationPiecesPtr miniBatchTranslationPieces = maxiBatchTranslationPieces->NextMiniBatch(miniSize);
+
         maxiBatchCopy->push_back(miniBatch->at(0));
+        maxiBatchTranslationPiecesCopy->push_back(miniBatchTranslationPieces->at(0));
 
         results.emplace_back(
           god_.GetThreadPool().enqueue(
-              [miniBatch]{ return TranslationTask(::god_, miniBatch); }
+              [miniBatch,miniBatchTranslationPieces]{ return TranslationTask(::god_, miniBatch, miniBatchTranslationPieces); }
               )
         );
       }
 
       maxiBatch.reset(new Sentences());
+      maxiBatchTranslationPieces.reset(new TranslationPieces());
     }
   }
 
@@ -64,10 +73,14 @@ boost::python::list translate(boost::python::list& in)
     maxiBatch->SortByLength();
     while (maxiBatch->size()) {
       SentencesPtr miniBatch = maxiBatch->NextMiniBatch(miniSize, miniWords);
+      TranslationPiecesPtr miniBatchTranslationPieces = maxiBatchTranslationPieces->NextMiniBatch(miniSize);
+
       maxiBatchCopy->push_back(miniBatch->at(0));
+      maxiBatchTranslationPiecesCopy->push_back(miniBatchTranslationPieces->at(0));
+
       results.emplace_back(
         god_.GetThreadPool().enqueue(
-            [miniBatch]{ return TranslationTask(::god_, miniBatch); }
+            [miniBatch,miniBatchTranslationPieces]{ return TranslationTask(::god_, miniBatch, miniBatchTranslationPieces); }
             )
       );
     }

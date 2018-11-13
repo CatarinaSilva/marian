@@ -15,11 +15,9 @@ using namespace std;
 
 namespace amunmt {
 
-void TranslationTaskAndOutput(const God &god, std::shared_ptr<Sentences> sentences) {
+
+void ProduceOutput(const God &god, std::shared_ptr<Sentences> sentences, std::shared_ptr<Histories> histories) {
   OutputCollector &outputCollector = god.GetOutputCollector();
-
-  std::shared_ptr<Histories> histories = TranslationTask(god, sentences);
-
   for (unsigned i = 0; i < histories->size(); ++i) {
     const History &history = *histories->at(i);
     unsigned lineNum = history.GetLineNum();
@@ -30,6 +28,17 @@ void TranslationTaskAndOutput(const God &god, std::shared_ptr<Sentences> sentenc
 
     outputCollector.Write(lineNum, strm.str());
   }
+}
+
+
+void TranslationTaskAndOutput(const God &god, std::shared_ptr<Sentences> sentences) {
+  std::shared_ptr<Histories> histories = TranslationTask(god, sentences);
+  ProduceOutput(god, sentences, histories);
+}
+
+void TranslationTaskAndOutput(const God &god, std::shared_ptr<Sentences> sentences, std::shared_ptr<TranslationPieces> pieces) {
+  std::shared_ptr<Histories> histories = TranslationTask(god, sentences, pieces);
+  ProduceOutput(god, sentences, histories);
 }
 
 std::shared_ptr<Histories> TranslationTask(const God &god, std::shared_ptr<Sentences> sentences) {
@@ -63,6 +72,40 @@ std::shared_ptr<Histories> TranslationTask(const God &god, std::shared_ptr<Sente
   }
 
 }
+
+std::shared_ptr<Histories> TranslationTask(const God &god, std::shared_ptr<Sentences> sentences, std::shared_ptr<TranslationPieces> pieces) {
+  try {
+    Search& search = god.GetSearch();
+    auto histories = search.Translate(*sentences, *pieces);
+
+    return histories;
+  }
+#ifdef CUDA
+  catch(thrust::system_error &e)
+  {
+    std::cerr << "CUDA error during some_function: " << e.what() << std::endl;
+    abort();
+  }
+#endif
+  catch(std::bad_alloc &e)
+  {
+    std::cerr << "Bad memory allocation during some_function: " << e.what() << std::endl;
+    abort();
+  }
+  catch(std::runtime_error &e)
+  {
+    std::cerr << "Runtime error during some_function: " << e.what() << std::endl;
+    abort();
+  }
+  catch(...)
+  {
+    std::cerr << "Some other kind of error during some_function" << std::endl;
+    abort();
+  }
+
+}
+
+
 
 }
 

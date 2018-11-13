@@ -6,6 +6,7 @@
 #include "common/histories.h"
 #include "common/filter.h"
 #include "common/base_tensor.h"
+#include "cpu/decoder/guided_score.h"
 
 #ifdef CUDA
 #include <cuda.h>
@@ -118,6 +119,69 @@ std::shared_ptr<Histories> Search::Translate(const Sentences& sentences) {
   return histories;
 }
 
+std::shared_ptr<Histories> Search::Translate(const Sentences& sentences, const TranslationPieces& translation_pieces) {
+  boost::timer::cpu_timer timer;
+
+  if (filter_) {
+    FilterTargetVocab(sentences);
+  }
+
+  States states = Encode(sentences, translation_pieces);
+  States nextStates = NewStates();
+  std::vector<unsigned> beamSizes(sentences.size(), 1);
+
+  std::shared_ptr<Histories> histories(new Histories(sentences, normalizeScore_, maxLengthMult_));
+  Beam prevHyps = histories->GetFirstHyps();
+
+  for (unsigned decoderStep = 0; decoderStep < maxLengthMult_ * (float) sentences.GetMaxLength(); ++decoderStep) {
+    //boost::timer::cpu_timer timerStep;
+    //timerStep.start();
+
+    for (unsigned i = 0; i < scorers_.size(); i++) {
+      scorers_[i]->Decode(*states[i], *nextStates[i], beamSizes);
+    }
+
+    if (decoderStep == 0) {
+      for (auto& beamSize : beamSizes) {
+        beamSize = maxBeamSize_;
+      }
+    }
+    //cerr << "beamSizes=" << Debug(beamSizes, 1) << endl;
+
+    bool hasSurvivors = CalcBeam(histories, beamSizes, prevHyps, states, nextStates, decoderStep);
+    if (!hasSurvivors) {
+      break;
+    }
+
+    //timerStep.stop();
+    //cerr << "decoderStep=" << decoderStep << " " << timerStep.format(4, "%w") << endl;
+    //cerr << "states0=" << states[0]->Debug(0) << endl;
+    //cerr << "beamSizes=" << beamSizes.size() << " " << histories->NumActive() << endl;
+    //++activeCount_[histories->NumActive()];
+  }
+
+  CleanAfterTranslation();
+
+  LOG(progress)->info("Search took {}", timer.format(3, "%ws"));
+  return histories;
+}
+
+
+States Search::Encode(const Sentences& sentences, const TranslationPieces& translation_pieces) {
+  States states;
+  for (auto& scorer : scorers_) {
+    scorer->Encode(sentences);
+    auto state = scorer->NewState();
+    scorer->BeginSentenceState(*state, sentences.size());
+    std::string scorer_name = scorer->GetType();
+    if(scorer_name == "guided"){
+      scorer->AddTranslationPieces(*state, sentences.size(), translation_pieces);
+    }
+    states.emplace_back(state);
+  }
+  return states;
+}
+
 States Search::Encode(const Sentences& sentences) {
   States states;
   for (auto& scorer : scorers_) {
@@ -128,6 +192,7 @@ States Search::Encode(const Sentences& sentences) {
   }
   return states;
 }
+
 
 bool Search::CalcBeam(
     std::shared_ptr<Histories>& histories,

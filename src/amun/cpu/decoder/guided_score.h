@@ -3,12 +3,14 @@
 #include <vector>
 #include <string>
 #include <yaml-cpp/yaml.h>
-
 #include "common/scorer.h"
 #include "common/loader.h"
+#include "common/sentences.h"
 #include "common/logging.h"
+#include "common/vocab.h"
 #include "common/base_best_hyps.h"
 #include "cpu/mblas/tensor.h"
+#include "common/translation_pieces.h"
 
 namespace amunmt {
 namespace CPU {
@@ -23,12 +25,8 @@ class GuidedScorerState : public State {
     CPU::mblas::Tensor& GetStates();
     const CPU::mblas::Tensor& GetStates() const;
 
-  	CPU::mblas::Tensor& GetEmbeddings();
-    const CPU::mblas::Tensor& GetEmbeddings() const;
-
   private:
     CPU::mblas::Tensor states_;
-    CPU::mblas::Tensor embeddings_;
 };
 
 class GuidedScorer : public Scorer {
@@ -40,7 +38,11 @@ class GuidedScorer : public Scorer {
     	const God &god,
         const std::string& name,
         const YAML::Node& config,
-        unsigned tab);
+        unsigned tab,
+        const std::vector<float> tpmap,
+        const Vocab& tvcb,
+        float sim_tresh,
+        unsigned max_n_grams);
 
     virtual State* NewState() const;
 
@@ -56,8 +58,41 @@ class GuidedScorer : public Scorer {
       return nullptr;
     }
 
+    virtual void Decode(
+        const State& in,
+        State& out,
+        const std::vector<unsigned>& beamSizes);
+
+    virtual void BeginSentenceState(State& state, unsigned batchSize){};
+
+    virtual void Encode(const Sentences& sources){}
+
+    virtual void AssembleBeamState(const State& in,
+                                   const Beam& beam,
+                                   State& out);
+
+    void AddTranslationPieces(State& state, unsigned batchSize, const TranslationPieces& translation_pieces);
+
+    void GetAttention(mblas::Tensor& Attention){}
+    mblas::Tensor& GetAttention();
+
+    unsigned GetVocabSize() const;
+
+    void SetSource(const Sentence& source);
+
+    BaseTensor& GetProbs();
+
+    void Filter(const std::vector<unsigned>& filterIds){}
+
   protected:
-    mblas::Tensor SourceContext_;
+    std::vector<float> tpMap_;
+    const Vocab& tvcb_;
+    mblas::ArrayMatrix Probs_;
+    std::vector<float> costs_;
+    std::vector<Words> last_ngrams_;
+    TranslationPiecePtr translation_pieces_;
+    float simThresh_;
+    unsigned maxNgrams_;
 };
 
 class GuidedScorerLoader : public Loader {
@@ -69,8 +104,13 @@ class GuidedScorerLoader : public Loader {
 
     virtual ScorerPtr NewScorer(const God &god, const DeviceInfo &deviceInfo) const;
     BaseBestHypsPtr GetBestHyps(const God &god, const DeviceInfo &deviceInfo) const;
-};
 
+  protected:
+    std::vector<float> tpMap_;
+    int vocab_size_;
+    float similarityThreshold_;
+    unsigned maxNgrams_;
+};
 
 }
 }

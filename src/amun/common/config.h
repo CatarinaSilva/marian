@@ -13,6 +13,7 @@ class Config {
     
   public:
     std::string inputPath;
+    std::string tpPath;
 
     bool Has(const std::string& key) const;
     
